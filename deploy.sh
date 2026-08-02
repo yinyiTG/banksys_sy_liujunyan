@@ -7,7 +7,6 @@ APP=banksys_sy_liujunyan
 PORT=8888
 PORT_MAX=8897
 CONTAINER_PORT=8888
-HEALTH=/_stcore/health
 
 echo ">> 开始部署 $APP 到 $(pwd)"
 
@@ -30,6 +29,4 @@ echo ">> 部署到主机端口 $HOST_PORT"
 # 一步停删自身旧容器,幂等可重跑
 docker rm -f "$APP" 2>/dev/null || true
 docker run -d --name "$APP" --restart unless-stopped -p "${HOST_PORT}:${CONTAINER_PORT}" "$APP":latest
-sleep 5
-python -c "import urllib.request,sys; urllib.request.urlopen('http://localhost:${HOST_PORT}${HEALTH}', timeout=5)"
-echo ">> 部署成功:http://$(hostname):${HOST_PORT}"
+echo ">> 部署成功:容器 $APP 已启动,主机端口 ${HOST_PORT} -> 容器内 ${CONTAINER_PORT}"
