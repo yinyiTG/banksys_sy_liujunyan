@@ -6,10 +6,6 @@ ENV PYTHONPATH=/app/src
 
 WORKDIR /app
 
-# 安装 curl 供健康检查使用(slim 镜像默认不带)
-RUN apt-get update && apt-get install -y --no-install-recommends curl \
-    && rm -rf /var/lib/apt/lists/*
-
 # 先装依赖,利用镜像层缓存
 COPY requirements.txt .
 RUN pip install --no-cache-dir --timeout 120 -i "${PIP_INDEX_URL}" -r requirements.txt
@@ -22,6 +18,6 @@ RUN python -m banksys_sy_liujunyan.train
 EXPOSE 8888
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
-  CMD curl -fsS http://localhost:8888/_stcore/health || exit 1
+  CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8888/_stcore/health', timeout=3)"
 
 CMD ["streamlit", "run", "src/banksys_sy_liujunyan/app.py", "--server.port=8888", "--server.address=0.0.0.0"]
