@@ -8,9 +8,9 @@
 
 ## 当前状态 (最后更新: 2026-08-02 · by AI 助手)
 
-- **阶段**:`已上线(对应 06 六步流程第⑥步:CD 部署成功,健康检查通过)`
-- **上一步完成**:PR #4(fix CD)合并 → CD 自动部署成功,落地主机端口 **8891**,健康检查 `/_stcore/health` 返回 ok。
-- **下一步 (TODO 第一条)**:向人类汇报访问地址;维护收尾(更新里程碑)。
+- **阶段**:`已上线(对应 06 六步流程第⑥步:CD 部署成功,容器运行中)`
+- **上一步完成**:健康检查相关 PR #6/#8/#9 处理后,CD 最终部署成功——容器 `banksys_sy_liujunyan` 运行中,主机端口 **8890** → 容器内 8888;Dockerfile 含 HEALTHCHECK(容器内 python urllib 探测),部署脚本去掉服务器侧健康检查。
+- **下一步 (TODO 第一条)**:更新里程碑/GOTACHAS;本地查看项目。
 - **阻塞项**:无。
 
 ---
@@ -55,9 +55,10 @@
 
 ## 已知坑 (GOTACHAS)
 
-- CD 失败 `open Dockerfile: no such file or directory`:原 cd.yml 用 `rsync -a ./ "$DEPLOY_DIR/"`,但 appleboy/ssh-action 的 script 在远程 home 目录执行,`./` 不是 runner 的 checkout 目录,仓库文件未上传。解决:改用 `appleboy/scp-action` 上传 `src,data,Dockerfile,requirements.txt,deploy.sh` 到服务器,再 ssh 执行 `deploy.sh`;验证:CD 重新跑通,健康检查 ok。
+- CD 失败 `open Dockerfile: no such file or directory`:原 cd.yml 用 `rsync -a ./ "$DEPLOY_DIR/"`,但 appleboy/ssh-action 的 script 在远程 home 目录执行,`./` 不是 runner 的 checkout 目录,仓库文件未上传。解决:改用 `appleboy/scp-action` 上传 `src,data,Dockerfile,requirements.txt,deploy.sh` 到服务器,再 ssh 执行 `deploy.sh`;验证:CD 重新跑通。
+- Dockerfile 加 HEALTHCHECK 后 CD 失败:`apt-get install curl` 在国内服务器上超时(549s)导致 build 失败。解决:不用 apt 装 curl,HEALTHCHECK 改用容器内 `python -c "import urllib.request; urllib.request.urlopen(...)"`(slim 镜像自带 python);验证:CI 的 docker build 通过。
+- deploy.sh 服务器侧健康检查报 `ImportError: No module named request`:服务器默认 `python` 环境异常。解决:deploy.sh 去掉服务器侧健康检查,容器 `docker run` 启动成功即部署完成(Dockerfile 内 HEALTHCHECK 由容器自己维护);验证:CD 全绿,容器运行。
 - Actions 警告 `Node.js 20 is deprecated`(checkout/setup-python 被强制跑 Node 24):仅提示不阻塞;后续可升级 actions 版本消除。
-  - 待遇到真实故障后按 06「故障反哺铁律」填写。
 
 ---
 
