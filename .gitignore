@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# 依赖与构建
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+*.coverage
+
+# 配置与密钥
+.env
+*.env
+
+# 模型产物(默认不进 Git,由训练脚本产出)
+models/
+*.joblib
+*.pkl
+
+# 系统
+.DS_Store
+Thumbs.db
