@@ -31,5 +31,5 @@ echo ">> 部署到主机端口 $HOST_PORT"
 docker rm -f "$APP" 2>/dev/null || true
 docker run -d --name "$APP" --restart unless-stopped -p "${HOST_PORT}:${CONTAINER_PORT}" "$APP":latest
 sleep 5
-curl -fsS "http://localhost:${HOST_PORT}${HEALTH}"
+python -c "import urllib.request,sys; urllib.request.urlopen('http://localhost:${HOST_PORT}${HEALTH}', timeout=5)"
 echo ">> 部署成功:http://$(hostname):${HOST_PORT}"
