@@ -8,9 +8,9 @@
 
 ## 当前状态 (最后更新: 2026-08-02 · by AI 助手)
 
-- **阶段**:`开发中(模块 1-3 完成,整合与本地 CI 自检通过;对应 06 六步流程第④步)`
-- **上一步完成**:app.py 双页入口 + Dockerfile + ci.yml + cd.yml 编写完成;本地自检(ruff format/check、pytest 20 过、覆盖率 95.49%)全绿;Streamlit 实际启动验证健康端点 200。
-- **下一步 (TODO 第一条)**:提交整合代码 → push feature 分支 → 创建 PR(确认门 5)。
+- **阶段**:`已上线(对应 06 六步流程第⑥步:CD 部署成功,健康检查通过)`
+- **上一步完成**:PR #4(fix CD)合并 → CD 自动部署成功,落地主机端口 **8891**,健康检查 `/_stcore/health` 返回 ok。
+- **下一步 (TODO 第一条)**:向人类汇报访问地址;维护收尾(更新里程碑)。
 - **阻塞项**:无。
 
 ---
@@ -31,10 +31,11 @@
 - [x] Streamlit 应用整合 + Dockerfile + 健康检查 `/_stcore/health`(实测 200)
 - [x] 本地 CI 自检(AI 执行):ruff 全绿 + pytest 20 过 + 覆盖率 95.49%
 - [x] ci.yml / cd.yml 编写
-- [ ] push feature 分支 + 创建 PR(`closes #<issue>`),CI 在 PR 复检
-- [ ] ✋ 人工 Review → 人类合并 main(合并是人类的动作,AI 绝不自行合并)
-- [ ] 验证 CD 自动部署(端口 8888 与访问地址)
-- [ ] 会话结束前更新本文件
+- [x] push feature 分支 + 创建 PR #2(`closes #1`),CI 在 PR 复检全绿
+- [x] PR #2 合并 main
+- [x] CD 首次失败 → 定位根因(Dockerfile 未上传)→ fix 分支修复(cd.yml 改 scp + deploy.sh)
+- [x] PR #4 合并 main → CD 自动部署成功(端口 8891,健康检查 ok)
+- [x] 会话结束前更新本文件
 
 ---
 
@@ -54,19 +55,21 @@
 
 ## 已知坑 (GOTACHAS)
 
-- <现象>:<根因>;解决:<怎么处理>;验证:<如何确认已修复>。
+- CD 失败 `open Dockerfile: no such file or directory`:原 cd.yml 用 `rsync -a ./ "$DEPLOY_DIR/"`,但 appleboy/ssh-action 的 script 在远程 home 目录执行,`./` 不是 runner 的 checkout 目录,仓库文件未上传。解决:改用 `appleboy/scp-action` 上传 `src,data,Dockerfile,requirements.txt,deploy.sh` 到服务器,再 ssh 执行 `deploy.sh`;验证:CD 重新跑通,健康检查 ok。
+- Actions 警告 `Node.js 20 is deprecated`(checkout/setup-python 被强制跑 Node 24):仅提示不阻塞;后续可升级 actions 版本消除。
   - 待遇到真实故障后按 06「故障反哺铁律」填写。
 
 ---
 
 ## 里程碑 (DONE)
 
-- [ ] 三份文档(00/01/PROGRESS)经人类确认
-- [ ] 完成建仓 + Secrets 配置
-- [ ] 完成工程骨架与 CI 全绿
-- [ ] 完成数据分析页(模块 1)
-- [ ] 完成离线训练与模型指标达标(模块 2)
-- [ ] 完成在线预测页(模块 3)
-- [ ] 完成完整 CI + CD 链路并部署成功
+- [x] 三份文档(00/01/PROGRESS)经人类确认
+- [x] 完成建仓 + Secrets 配置
+- [x] 完成工程骨架与 CI 全绿
+- [x] 完成数据分析页(模块 1)
+- [x] 完成离线训练与模型指标达标(模块 2,AUC 0.895)
+- [x] 完成在线预测页(模块 3)
+- [x] 完成完整 CI + CD 链路并部署成功(服务器端口 8891,健康检查 ok)
+- [x] 本地 8888 端口运行项目供本地查看
 
 > 反臃肿:里程碑超过 15 条时,把更早内容合并成一行摘要,保持本文件可快速阅读。
