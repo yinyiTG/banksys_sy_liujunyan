@@ -1,0 +1,28 @@
+[project]
+name = "banksys-sy-liujunyan"
+version = "0.1.0"
+description = "银行营销数据分析与认购预测 Web 应用"
+requires-python = ">=3.11"
+dependencies = []
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "SIM"]
+ignore = []
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.coverage.run]
+omit = [
+    "src/banksys_sy_liujunyan/app.py",
+    "src/banksys_sy_liujunyan/pages_*.py",
+    "src/banksys_sy_liujunyan/ui.py",
+]
+
+[tool.coverage.report]
+fail_under = 80
