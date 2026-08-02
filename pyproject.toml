@@ -16,3 +16,13 @@ ignore = []
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-q"
+
+[tool.coverage.run]
+omit = [
+    "src/banksys_sy_liujunyan/app.py",
+    "src/banksys_sy_liujunyan/pages_*.py",
+    "src/banksys_sy_liujunyan/ui.py",
+]
+
+[tool.coverage.report]
+fail_under = 80

@@ -8,10 +8,10 @@
 
 ## 当前状态 (最后更新: 2026-08-02 · by AI 助手)
 
-- **阶段**:`初始化(对应 06 六步流程第①步之前)`
-- **上一步完成**:读取 `standards/` 全部规范与数据;填写 `00-project-context.md`、`01-requirements.md`、本文件第一批 TODO。
-- **下一步 (TODO 第一条)**:人类确认三份文档 → 创建 GitHub 开源仓库 `banksys_sy_liujunyan`。
-- **阻塞项**:无。文档确认后,建仓完成即需人类配置 Secrets(SSH_PRIVATE_KEY / SSH_HOST / SSH_USER),否则 CD 必失败。
+- **阶段**:`开发中(模块 1-3 完成,整合与本地 CI 自检通过;对应 06 六步流程第④步)`
+- **上一步完成**:app.py 双页入口 + Dockerfile + ci.yml + cd.yml 编写完成;本地自检(ruff format/check、pytest 20 过、覆盖率 95.49%)全绿;Streamlit 实际启动验证健康端点 200。
+- **下一步 (TODO 第一条)**:提交整合代码 → push feature 分支 → 创建 PR(确认门 5)。
+- **阻塞项**:无。
 
 ---
 
@@ -20,20 +20,20 @@
 - [x] 初始化项目上下文:`00-project-context.md`
 - [x] 确认需求与验收标准:`01-requirements.md`
 - [x] 写下本文件第一批 TODO
-- [ ] ✋ 人类确认以上三份文档
-- [ ] 创建 GitHub 开源仓库 `banksys_sy_liujunyan`(main 只放 .gitignore / 占位 README)
-- [ ] ✋ 提示人类配置 Secrets:SSH_PRIVATE_KEY / SSH_HOST / SSH_USER(新仓库默认为空)
-- [ ] 从 `main` 开 feature 分支(如 `feature/1-init-project`),严禁直接改 main
-- [ ] 工程骨架:源码包目录、`requirements.txt` / `requirements-dev.txt`、`pyproject.toml`(ruff+pytest 配置)、`.gitignore`
-- [ ] 模块 1:数据加载(`data_loader.py`)+ 分析计算(`eda.py`)+ 分析页(含测试)
-- [ ] 模块 2:特征工程(`features.py`)+ 离线训练与评估(`train.py`,含指标门槛与可复现种子)+ 模型产物
-- [ ] 模块 3:在线预测(`predict.py`)+ 预测页(点选式输入)(含测试)
-- [ ] Streamlit 应用整合 + `Dockerfile` + 健康检查 `/_stcore/health`
-- [ ] 本地 CI 自检(AI 执行):`ruff format --check .` + `ruff check .` + `pytest --cov --cov-fail-under=80`
-- [ ] `.github/workflows/ci.yml`(格式/lint/测试/覆盖率/docker build)
+- [x] ✋ 人类确认以上三份文档
+- [x] 创建 GitHub 开源仓库 `banksys_sy_liujunyan`
+- [x] ✋ 人类配置 Secrets:SSH_PRIVATE_KEY / SSH_HOST / SSH_USER(已核对)
+- [x] 从 `main` 开 feature 分支(`feature/1-init-project`)
+- [x] 工程骨架:pyproject/requirements/conda 环境(Python 3.11)
+- [x] 模块 1:数据加载 + 分析计算 + 分析页(含测试)
+- [x] 模块 2:特征工程 + 离线训练(AUC 0.895 ≥ 0.80)+ 模型产物
+- [x] 模块 3:在线预测(`predict.py` + 点选式预测页,含测试)
+- [x] Streamlit 应用整合 + Dockerfile + 健康检查 `/_stcore/health`(实测 200)
+- [x] 本地 CI 自检(AI 执行):ruff 全绿 + pytest 20 过 + 覆盖率 95.49%
+- [x] ci.yml / cd.yml 编写
 - [ ] push feature 分支 + 创建 PR(`closes #<issue>`),CI 在 PR 复检
 - [ ] ✋ 人工 Review → 人类合并 main(合并是人类的动作,AI 绝不自行合并)
-- [ ] `.github/workflows/cd.yml`:SSH 部署 + 健康检查,验证端口 8888 与访问地址
+- [ ] 验证 CD 自动部署(端口 8888 与访问地址)
 - [ ] 会话结束前更新本文件
 
 ---
@@ -42,8 +42,10 @@
 
 | 日期 | 决策 | 理由 |
 |---|---|---|
+| 2026-08-02 | 覆盖率门槛排除 Streamlit UI 薄层(app.py/pages_*/ui.py) | UI 层为薄壳,不适合单测;核心逻辑覆盖达 95%,门槛只卡核心代码 |
+| 2026-08-02 | 模型用 RandomForest(300 树、balanced、seed 42) | 实际 AUC 0.895,达标且可复现 |
 | 2026-08-02 | 数据 `data/*.csv` 进 Git | 公开教学数据、体积小(约 3.7MB),CI 干净环境可直接复现 |
-| 2026-08-02 | 模型产物默认不进 Git | 大文件/产物不入库;由训练脚本产出,构建/运行时按需生成加载 |
+| 2026-08-02 | 模型产物默认不进 Git | 大文件/产物不入库;Dockerfile 构建时离线训练生成 |
 | 2026-08-02 | 健康检查用 `/_stcore/health` | Streamlit 内置健康端点,无需额外服务 |
 | 2026-08-02 | 容器内端口固定 8888,主机端口预留区间 8888–8897 自动回退 | 遵循 05 标准,避免端口冲突 |
 | 2026-08-02 | `duration` 保留参与建模(人类确认) | 需求要求保留;已知未来信息泄漏风险,预测页如实展示该输入 |

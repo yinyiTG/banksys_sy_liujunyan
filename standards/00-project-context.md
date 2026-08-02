@@ -63,7 +63,7 @@ banksys_sy_liujunyan/
 | 格式检查 | `ruff format --check .` |
 | 静态检查 | `ruff check .` |
 | 单元测试 | `pytest` |
-| 覆盖率 | `pytest --cov --cov-fail-under=80`(核心逻辑 ≥ 80%) |
+| 覆盖率 | `pytest --cov --cov-fail-under=80`(核心逻辑 ≥ 80%;Streamlit UI 薄层 app.py/pages_*/ui.py 不计入) |
 | 构建 | `docker build` 成功(在 CI/服务器,本地不强制 Docker) |
 | 业务/模型指标 | 二分类 **AUC ≥ 0.80**(基线,数据探索后校准);健康检查 `/_stcore/health` 返回 200 |
 

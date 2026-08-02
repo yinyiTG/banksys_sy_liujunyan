@@ -1,0 +1,53 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  quality:
+    name: Lint & Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements-dev.txt
+
+      - name: Format check
+        run: ruff format --check .
+
+      - name: Lint check
+        run: ruff check .
+
+      - name: Unit tests with coverage
+        run: pytest --cov=src --cov-fail-under=80
+        env:
+          PYTHONPATH: src
+
+  build:
+    name: Docker build
+    runs-on: ubuntu-latest
+    needs: quality
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build image
+        run: docker build -t banksys_sy_liujunyan:latest .
+
+      - name: Smoke test health endpoint
+        run: |
+          docker run -d --name banksys_sy_liujunyan -p 8888:8888 banksys_sy_liujunyan:latest
+          for i in $(seq 1 30); do
+            if curl -fsS http://localhost:8888/_stcore/health; then exit 0; fi
+            sleep 2
+          done
+          docker logs banksys_sy_liujunyan
+          exit 1
